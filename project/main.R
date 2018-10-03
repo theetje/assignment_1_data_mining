@@ -1,34 +1,39 @@
-credit.dat <- read.csv("./credit.txt")
-t <- c(1,0,1,1,1,0,0,1,1,0,1)
+source("helpers.R")
+credit.data <- read.csv("./credit.txt")
+class <- credit.dat[,6]
+data <- subset(credit.dat, select=c("age", "income"))
 
-impurity <- function(vector){
-  total <- length(vector)
-  occ <- table(vector)
-  occ1 <- occ[names(occ) == 1]
-  if(identical(unname(occ1), integer(0)))
-    occ1 <- 0
-  return((occ1 / total) * (1 - (occ1 / total)))
-}
-impurity(t)
+root <- setRefClass("root", fields = list(left = "ANY", right = "ANY"))
+node <- setRefClass("node", fields = list(left = "ANY", right = "ANY", attribute ="ANY", value="ANY"))
+leaf <- setRefClass("leaf", fields = list(data_set = "ANY"))
 
-bestsplit <- function(x, y){
-  x.sort <- sort(unique(x))
-  l <- length(x.sort)
-  ly <- length(y);
-  x.split <- (x.sort[1:(l - 1)] + x.sort[2:l])/2
-  impurityValue <- c()
-  splitValue <- NULL
-  impurityValue <- impurity(y)
-  for(split in x.split){
-    dataLeft <- y[x <= split]
-    dataRight <- y[x > split]
-    impuritySplit = (length(dataLeft) / ly) * impurity(dataLeft) + (length(dataRight) / ly) * impurity(dataRight)
-    if(impuritySplit < impurityValue){
-      splitValue <- split
-      impurityValue <- impuritySplit
-    }
+
+tree.grow <- function(x, y, nmin, minleaf, nfeat) {
+  node <- node(left=NULL, right=NULL, attribute=x, value=y)
+
+  if (impurity(node$value) > 0) {
+    attribute <- subset(node$attribute, select=1)
+    
+    S <- bestsplit(attribute[,1], node$value)
+    print(S)
+    # Split S make left and right node.
   }
-  return(splitValue)
+  
+  # for(attribute in node$attribute) {
+  #   print()
+  #   print(impurity(y))
+  #   if (impurity(node) > 0) {
+  #     S <- bestSplit(node, y)
+  #     print(S)
+  #     # left <- tree.grow(dataleft)
+  #     # right <- tree.grow(dataRight)
+  #   }
+  # }
+
+  # node <- function(left, right, data_set) {
+  #   root(left = left, right = right)
+  # }
+   return(root)
 }
 
-bestsplit(credit.dat[,4],credit.dat[,6])
+tree.grow(data,class,1,1,1)
