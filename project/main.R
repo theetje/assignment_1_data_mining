@@ -1,39 +1,31 @@
 source("helpers.R")
 credit.data <- read.csv("./credit.txt")
-class <- credit.dat[,6]
-data <- subset(credit.dat, select=c("age", "income"))
+class <- credit.data[,6]
+data <- subset(credit.data, select=c("age", "income"))
 
 root <- setRefClass("root", fields = list(left = "ANY", right = "ANY"))
 node <- setRefClass("node", fields = list(left = "ANY", right = "ANY", attribute ="ANY", value="ANY"))
 leaf <- setRefClass("leaf", fields = list(data_set = "ANY"))
 
-
 tree.grow <- function(x, y, nmin, minleaf, nfeat) {
-  node <- node(left=NULL, right=NULL, attribute=x, value=y)
-
-  if (impurity(node$value) > 0) {
-    attribute <- subset(node$attribute, select=1)
+  print("X AT START: ")
+  print(x)
+  if (impurity(y) == 0) {
+    print("pure")
+    return(leaf(data_set=x))
+  } else {
+    print("impure")
+    attribute <- x[,1]
+    x[1] <- NULL
+    S <- bestsplit(x[,1], y)
+    df <- data.frame(attribute=attribute, value=y)
+    s.star <- split(df, df[,1] < S)
+    print(s.star$T)
+    left.node <- tree.grow(s.star$F[1], s.star$F[2], nmin, minleaf, nfeat)
+    right.node <- tree.grow(s.star$T[1], s.star$T[2], nmin, minleaf, nfeat)
     
-    S <- bestsplit(attribute[,1], node$value)
-    print(S)
-    # Split S make left and right node.
+    return(node(left=left.node, right=right.node, attribute=x, value=y))
   }
-  
-  # for(attribute in node$attribute) {
-  #   print()
-  #   print(impurity(y))
-  #   if (impurity(node) > 0) {
-  #     S <- bestSplit(node, y)
-  #     print(S)
-  #     # left <- tree.grow(dataleft)
-  #     # right <- tree.grow(dataRight)
-  #   }
-  # }
-
-  # node <- function(left, right, data_set) {
-  #   root(left = left, right = right)
-  # }
-   return(root)
 }
 
-tree.grow(data,class,1,1,1)
+tree <- tree.grow(data,class,1,1,1)
