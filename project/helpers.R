@@ -17,6 +17,27 @@ delta.impurity <- function(t, l, r) {
   return(i.t - p.l * imp.l - p.r * imp.r)
 }
 
+bestsplit <- function(x, y){
+  x.sort <- sort(unique(x))
+  l <- length(x.sort)
+  ly <- length(y);
+  x.split <- (x.sort[1:(l - 1)] + x.sort[2:l])/2
+  impurityValue <- c()
+  splitValue <- NULL
+  impurityValue <- impurity(y)
+  for(split in x.split){
+    dataLeft <- y[x <= split]
+    dataRight <- y[x > split]
+    impuritySplit = (length(dataLeft) / ly) * impurity(dataLeft) + (length(dataRight) / ly) * impurity(dataRight)
+    if(impuritySplit < impurityValue){
+      splitValue <- split
+      impurityValue <- impuritySplit
+    }
+  }
+  return(c(splitValue, impurityValue))
+}
+
+
 make.s.star <- function(attribute, y) {
   S <- bestsplit(attribute, y)
   df <- data.frame(attribute, value=y)
