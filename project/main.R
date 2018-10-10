@@ -16,9 +16,6 @@ node <-
     ),
     methods = list(
       classify = function(x) {
-        print(attribute)
-        print(x[attribute])
-        print(value)
         if (x[attribute] > value)
           return(left$classify(x))
         else
@@ -50,8 +47,6 @@ tree.grow <- function(x, y, nmin, minleaf, nfeat) {
   attributeValue <- NULL
   names <- colnames(data)
   predictors <- sample(names, nfeat)
-  print(data$"gender")
-  print(predictors)
   for (a in predictors) {
     if (length(unique(x[[a]])) > 1) {
       s <- bestsplit(x[[a]], y)
@@ -81,9 +76,33 @@ tree.grow <- function(x, y, nmin, minleaf, nfeat) {
   ))))
 }
 
+tree.classify <- function(x, tr) {
+  tr$classify(x)
+}
+
+tree.grow.bag <- function(x, y, nmin, minleaf, nfeat, m) {
+  trees <- c()
+  for (i in 1:m){
+    samples <- sample(nrow(x), length(x), TRUE)
+    trees <- append(trees, tree.grow(x[samples,], y[samples,], nmin, minleaf, nfeat))
+  }
+}
+
+tree.classify.bag <- function(x, tr){
+  classifications <- c()
+  for(d in 1:nrow(x)) {
+    guesses <- c()
+    for(t in tr){
+      guesses <- append(guesses, t$classify(x[d,]))
+    }
+    classifications <- append(classifications, as.integer(names(which.max(table(guesses)))))
+  }
+  return(classifications)
+}
 
 tree <- tree.grow(data, class, 1, 1, 5)
 
 print(tree)
 
 print(tree$classify(data[7, ]))
+print(tree.classify.bag(data, c(tree)))
