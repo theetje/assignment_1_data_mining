@@ -25,16 +25,24 @@ bestsplit <- function(x, y){
   impurityValue <- c()
   splitValue <- NULL
   impurityValue <- impurity(y)
+  shortestLength <- NULL
   for(split in x.split){
     dataLeft <- y[x <= split]
     dataRight <- y[x > split]
+    lDL <- length(dataLeft)
+    lDR <- length(dataRight)
+    if(lDL <= lDR)
+      shortest <- lDL
+    else
+      shortest <- lDR
     impuritySplit = (length(dataLeft) / ly) * impurity(dataLeft) + (length(dataRight) / ly) * impurity(dataRight)
     if(impuritySplit < impurityValue){
       splitValue <- split
       impurityValue <- impuritySplit
+      shortestLength <- shortest
     }
   }
-  return(c(splitValue, impurityValue))
+  return(c(splitValue, impurityValue, shortestLength))
 }
 
 

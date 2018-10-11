@@ -50,7 +50,7 @@ tree.grow <- function(x, y, nmin, minleaf, nfeat) {
   for (a in predictors) {
     if (length(unique(x[[a]])) > 1) {
       s <- bestsplit(x[[a]], y)
-      if (s[2] < impurityValue) {
+      if (s[2] < impurityValue && s[3] >= minleaf) {
         impurityValue <- s[2]
         attribute <- x[[a]]
         attributeName <- a
