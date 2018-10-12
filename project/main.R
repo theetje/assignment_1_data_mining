@@ -35,6 +35,14 @@ leaf <-
     )
   )
 
+# tree.grow
+# Parameters: x; the input data used to create the tree, dataframe
+#             y; the class labels for the data, dataframe
+#             nmin; the amount of data points a node needs to split, integer
+#             minleaf; the minimum amount of data points that need to be in a leaf, integer
+#             nfeat; the amount of features from the total that have to be considered on each split, integer
+# Result: A complete tree, node
+# Description: Builds a tree based on the input data
 tree.grow <- function(x, y, nmin, minleaf, nfeat) {
   impurityValue <- impurity(y)
   # If the data is pure or there aren't enough data points, this will be a leaf.
@@ -86,10 +94,25 @@ tree.grow <- function(x, y, nmin, minleaf, nfeat) {
   ))))
 }
 
+# tree.classify
+# Parameters: x; the data point to classify, dataframe (single value)
+#             tr; the tree to use in the classification, node
+# Result: The predicted class, integer
+# Description: Takes data point x and classifies it using the tree.
 tree.classify <- function(x, tr) {
   # Call the reference class classify function
   tr$classify(x)
 }
+
+# tree.grow.bag
+# Parameters: x; the input data used to create the tree, dataframe
+#             y; the class labels for the data, dataframe
+#             nmin; the amount of data points a node needs to split, integer
+#             minleaf; the minimum amount of data points that need to be in a leaf, integer
+#             nfeat; the amount of features from the total that have to be considered on each split, integer
+#             m; the amount of trees that should be created
+# Result: A complete tree, node
+# Description: Builds a list of trees, containing m trees, based on the input data
 
 tree.grow.bag <- function(x, y, nmin, minleaf, nfeat, m) {
   # Vector for trees
@@ -106,6 +129,11 @@ tree.grow.bag <- function(x, y, nmin, minleaf, nfeat, m) {
   return(trees)
 }
 
+# tree.classify.bag
+# Parameters: x; the data that has to be classified, dataframe
+#             tr; the trees to use in the classification, vector of nodes
+# Result: The predicted classes, vector of integers
+# Description: Takes data and classifies it using the provides trees, taking the majority vote
 tree.classify.bag <- function(x, tr) {
   # Vector for classifications of all data
   classifications <- c()
@@ -128,6 +156,10 @@ tree.classify.bag <- function(x, tr) {
   return(classifications)
 }
 
+# impurity
+# Parameters: vector; the vector of classes with impurity, vector of integers
+# Result: The impurity, float
+# Description: Takes vector of integers and calculates impurity using Gini index
 impurity <- function(vector) {
   # Get the total amount of data points
   total <- length(vector)
@@ -145,6 +177,14 @@ impurity <- function(vector) {
 # This method has more parameters for efficiency, this way unique values and the impurity of Y don't have to be
 # calculated again in this method, and no calculations that will result in a rejection down the line due to minleaf
 # being too low have to be made
+# bestsplit
+# Parameters: x; the vector that needs to be split on, any numeric vector
+#             y; the class labels, vector of integers
+#             uniX; unique version of vector x, any numeric vector
+#             impY; impurity of vector y, float
+#             minleaf; the minimum amount of data points that need to be in a leaf, integer
+# Result: A vector of the value that should be split on (numeric) and the impurity (float)
+# Description: Calculates the best split on data x which minimises impurity in y
 bestsplit <- function(x, y, uniX, impY, minleaf) {
   # Sort the values of x
   x.sort <- sort(uniX)
@@ -218,13 +258,13 @@ pimaData <- pima[1:8]
 pimaClass <- pima[, 9]
 
 # Verification data from the assignment (pima dataset)
-tree <- tree.grow(pimaData, pimaClass, 20, 5, 8)
-pred <- tree.classify.bag(pimaData, c(tree))
-print("Pima")
-print(table(pred, pimaClass))
+#tree <- tree.grow(pimaData, pimaClass, 20, 5, 8)
+#pred <- tree.classify.bag(pimaData, c(tree))
+#print("Pima")
+#print(table(pred, pimaClass))
 
 # Single tree, with classification on one piece of data to confirm working and on the full data
-#tree <- tree.grow(e.2.0.data, e.2.0.class, 15, 15, 41)
+tree <- tree.grow(e.2.0.data, e.2.0.class, 15, 15, 41)
 #print(tree$classify(e.3.0.data[180,]))
 #pred <- tree.classify.bag(e.3.0.data, c(tree))
 #print("Single")
