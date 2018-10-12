@@ -17,8 +17,8 @@ delta.impurity <- function(t, l, r) {
   return(i.t - p.l * imp.l - p.r * imp.r)
 }
 
-bestsplit <- function(x, y, minleaf, impY) {
-  x.sort <- sort(x)
+bestsplit <- function(x, y, uniX, impY, minleaf) {
+  x.sort <- sort(uniX)
   l <- length(x.sort)
   ly <- length(y)
   
@@ -36,7 +36,8 @@ bestsplit <- function(x, y, minleaf, impY) {
     else
       shortest <- lDR
     if (shortest >= minleaf) {
-      impuritySplit <- (lDL / ly) * impurity(dataLeft) + (lDR / ly) * impurity(dataRight)
+      impuritySplit <-
+        (lDL / ly) * impurity(dataLeft) + (lDR / ly) * impurity(dataRight)
       if (impuritySplit < impurityValue) {
         splitValue <- split
         impurityValue <- impuritySplit

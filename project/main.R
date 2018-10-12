@@ -19,7 +19,6 @@ pima <- read.csv("./pima.csv")
 pimaData <- pima[1:8]
 pimaClass <- pima[, 9]
 
-
 root <-
   setRefClass("root", fields = list(left = "ANY", right = "ANY"))
 node <-
@@ -52,12 +51,12 @@ leaf <-
   )
 
 tree.grow <- function(x, y, nmin, minleaf, nfeat) {
-  if (length(y) < nmin || length(unique(y)) == 1) {
+  impurityValue <- impurity(y)
+  if (impurityValue == 0 || length(y) < nmin) {
     return(leaf(data_set = as.integer(names(
       which.max(table(y))
     ))))
   }
-  impurityValue <- impurity(y)
   attributeName <- NULL
   attribute <- NULL
   attributeValue <- NULL
@@ -66,8 +65,8 @@ tree.grow <- function(x, y, nmin, minleaf, nfeat) {
   for (a in predictors) {
     uni <- unique(x[, a])
     if (length(uni) > 1) {
-      s <- bestsplit(uni, y, minleaf, impurityValue)
-      if (s[2] < impurityValue) {
+      s <- bestsplit(x[[a]], y, uni, impurityValue, minleaf)
+      if (s[2] < impurityValue && s[3] >= minleaf) {
         impurityValue <- s[2]
         attribute <- x[, a]
         attributeName <- a
@@ -81,8 +80,8 @@ tree.grow <- function(x, y, nmin, minleaf, nfeat) {
       node(
         attribute = attributeName,
         value = attributeValue,
-        left = tree.grow(x[attribute >= attributeValue, ], y[attribute >= attributeValue], nmin, minleaf, nfeat),
-        right = tree.grow(x[attribute < attributeValue, ], y[attribute < attributeValue], nmin, minleaf, nfeat)
+        left = tree.grow(x[attribute >= attributeValue,], y[attribute >= attributeValue], nmin, minleaf, nfeat),
+        right = tree.grow(x[attribute < attributeValue,], y[attribute < attributeValue], nmin, minleaf, nfeat)
       )
     )
   }
@@ -99,12 +98,8 @@ tree.grow.bag <- function(x, y, nmin, minleaf, nfeat, m) {
   trees <- c()
   for (i in 1:m) {
     samples <- sample(nrow(x), nrow(x), TRUE)
-    startTime <- Sys.time()
-    t <- tree.grow(x[samples, ], y[samples], nmin, minleaf, nfeat)
-    trees <- append(trees, t)
-    endTime <- Sys.time()
-    print(endTime - startTime)
-    print(i)
+    trees <-
+      append(trees, tree.grow(x[samples, ], y[samples], nmin, minleaf, nfeat))
   }
   return(trees)
 }
@@ -114,7 +109,7 @@ tree.classify.bag <- function(x, tr) {
   for (d in 1:nrow(x)) {
     guesses <- c()
     for (t in tr) {
-      guesses <- append(guesses, t$classify(x[d, ]))
+      guesses <- append(guesses, t$classify(x[d,]))
     }
     classifications <-
       append(classifications, as.integer(names(which.max(table(
@@ -124,21 +119,26 @@ tree.classify.bag <- function(x, tr) {
   return(classifications)
 }
 
-#tree <- tree.grow(pimaData, pimaClass, 20, 5, 8)
-#pred <- tree.classify.bag(pimaData, c(tree))
-#print("Pima")
-#print(table(pred, pimaClass))
+#tree <- tree.grow(e.2.0.data, e.2.0.class, 15, 15, 41)
+# print(tree)
+#print(tree$classify(e.3.0.data[180,]))
 
+tree <- tree.grow(pimaData, pimaClass, 20, 5, 8)
+pred <- tree.classify.bag(pimaData, c(tree))
+print("Pima")
+print(table(pred, pimaClass))
+#tree <- tree.grow(e.2.0.data, e.2.0.class, 15, 15, 41)
 
-tree <- tree.grow(e.2.0.data, e.2.0.class, 15, 15, 41)
-print(tree)
 #print(tree$classify(e.3.0.data[180,]))
 #pred <- tree.classify.bag(e.3.0.data, c(tree))
 #print(table(pred, e.3.0.class))
-
-trees <- tree.grow.bag(e.2.0.data, e.2.0.class, 15, 15, 41, 4)
+#trees <- tree.grow.bag(e.2.0.data, e.2.0.class, 15, 15, 41, 4)
 #preds <- tree.classify.bag(e.3.0.data, trees)
 #print(table(preds, e.3.0.class))
+#trees <- tree.grow.bag(e.2.0.data, e.2.0.class, 15, 15, 41, 100)
+#preds <- tree.classify.bag(e.3.0.data, trees)
+#print(table(preds, e.3.0.class))
+# print(tree.classify.bag(data, c(tree))) 	# print(tree.classify.bag(data, c(tree)))
 
 #trees <- tree.grow.bag(e.2.0.data, e.2.0.class, 15, 15, 6, 100)
 #preds <- tree.classify.bag(e.3.0.data, trees)
