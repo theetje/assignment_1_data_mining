@@ -23,9 +23,9 @@ bestsplit <- function(x, y){
   ly <- length(y);
   x.split <- (x.sort[1:(l - 1)] + x.sort[2:l])/2
   impurityValue <- c()
-  splitValue <- NULL
+  splitValue <- impurity(y)
   impurityValue <- impurity(y)
-  shortestLength <- NULL
+  shortestLength <- length(y)
   for(split in x.split){
     dataLeft <- y[x <= split]
     dataRight <- y[x > split]

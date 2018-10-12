@@ -58,7 +58,7 @@ tree.grow <- function(x, y, nmin, minleaf, nfeat) {
   attribute <- NULL
   attributeValue <- NULL
   names <- colnames(x)
-  predictors <- sample(names, nfeat, TRUE)
+  predictors <- sample(names, nfeat)
   for (a in predictors) {
     if (length(unique(x[[a]])) > 1) {
       s <- bestsplit(x[[a]], y)
@@ -72,14 +72,12 @@ tree.grow <- function(x, y, nmin, minleaf, nfeat) {
   }
   if (!is.null(attribute))
   {
-    df <- data.frame(x, value = y)
-    s.star <- split(df, attribute < attributeValue)
     return(
       node(
         attribute = attributeName,
         value = attributeValue,
-        left = tree.grow(s.star$F[1], s.star$F$value, nmin, minleaf, nfeat),
-        right = tree.grow(s.star$T[1], s.star$T$value, nmin, minleaf, nfeat)
+        left = tree.grow(x[attribute >= attributeValue,], y[attribute >= attributeValue], nmin, minleaf, nfeat),
+        right = tree.grow(x[attribute < attributeValue,], y[attribute < attributeValue], nmin, minleaf, nfeat)
       )
     )
   }
@@ -114,7 +112,7 @@ tree.classify.bag <- function(x, tr){
 
 tree <- tree.grow(e.2.0.data, e.2.0.class, 15, 15, 41)
 # print(tree)
-print(tree$classify(e.3.0.data[19,]))
+print(tree$classify(e.3.0.data[180,]))
 
 
 # print(tree.classify.bag(data, c(tree)))
