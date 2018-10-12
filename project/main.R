@@ -255,13 +255,13 @@ pimaData <- pima[1:8]
 pimaClass <- pima[, 9]
 
 # Verification data from the assignment (pima dataset)
-#tree <- tree.grow(pimaData, pimaClass, 20, 5, 8)
-#pred <- tree.classify.bag(pimaData, c(tree))
-#print("Pima")
-#print(table(pred, pimaClass))
+tree <- tree.grow(pimaData, pimaClass, 20, 5, 8)
+pred <- tree.classify.bag(pimaData, c(tree))
+print("Pima")
+print(table(pred, pimaClass))
 
 # Single tree, with classification on one piece of data to confirm working and on the full data
-tree <- tree.grow(e.2.0.data, e.2.0.class, 15, 15, 41)
+#tree <- tree.grow(e.2.0.data, e.2.0.class, 15, 15, 41)
 #print(tree$classify(e.3.0.data[180,]))
 #pred <- tree.classify.bag(e.3.0.data, c(tree))
 #print("Single")
