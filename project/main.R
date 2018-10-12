@@ -2,11 +2,13 @@ source("helpers.R")
 
 e.2.0.data <- read.csv("./eclipse-metrics-packages-2.0.csv")
 e.3.0.data <- read.csv("./eclipse-metrics-packages-3.0.csv")
+e.2.0.data <- e.2.0.data[1:42]
+e.3.0.data <- e.3.0.data[1:42]
 
 e.2.0.data$post[e.2.0.data$post > 0] <- 1
 e.3.0.data$post[e.3.0.data$post > 0] <- 1
 
-e.2.0.class <- e.2.0.data$post
+e.2.0.class <- e.2.0.data$pre
 e.3.0.class <- e.3.0.data$post
 
 e.2.0.data$post <- NULL
