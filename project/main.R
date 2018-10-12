@@ -15,6 +15,9 @@ e.3.0.class <- e.3.0.data$post
 e.2.0.data$post <- NULL
 e.3.0.data$post <- NULL
 
+pima <- read.csv("./pima.csv")
+pimaData <- pima[1:8]
+pimaClass <- pima[, 9]
 
 root <-
   setRefClass("root", fields = list(left = "ANY", right = "ANY"))
@@ -48,20 +51,21 @@ leaf <-
   )
 
 tree.grow <- function(x, y, nmin, minleaf, nfeat) {
-  if (impurity(y) == 0 || length(y) < nmin) {
+  impurityValue <- impurity(y)
+  if (impurityValue == 0 || length(y) < nmin) {
     return(leaf(data_set = as.integer(names(
       which.max(table(y))
     ))))
   }
-  impurityValue <- impurity(y)
   attributeName <- NULL
   attribute <- NULL
   attributeValue <- NULL
   names <- colnames(x)
   predictors <- sample(names, nfeat)
   for (a in predictors) {
-    if (length(unique(x[[a]])) > 1) {
-      s <- bestsplit(x[[a]], y)
+    uni <- unique(x[, a])
+    if (length(uni) > 1) {
+      s <- bestsplit(x[[a]], y, uni, impurityValue)
       if (s[2] < impurityValue && s[3] >= minleaf) {
         impurityValue <- s[2]
         attribute <- x[[a]]
@@ -93,9 +97,10 @@ tree.classify <- function(x, tr) {
 tree.grow.bag <- function(x, y, nmin, minleaf, nfeat, m) {
   trees <- c()
   for (i in 1:m){
-    samples <- sample(nrow(x), length(x), TRUE)
-    trees <- append(trees, tree.grow(x[samples,], y[samples,], nmin, minleaf, nfeat))
+    samples <- sample(nrow(x), nrow(x), TRUE)
+    trees <- append(trees, tree.grow(x[samples,], y[samples], nmin, minleaf, nfeat))
   }
+  return(trees)
 }
 
 tree.classify.bag <- function(x, tr){
@@ -110,9 +115,26 @@ tree.classify.bag <- function(x, tr){
   return(classifications)
 }
 
-tree <- tree.grow(e.2.0.data, e.2.0.class, 15, 15, 41)
+#tree <- tree.grow(e.2.0.data, e.2.0.class, 15, 15, 41)
 # print(tree)
-print(tree$classify(e.3.0.data[180,]))
+#print(tree$classify(e.3.0.data[180,]))
+
+tree <- tree.grow(pimaData, pimaClass, 20, 5, 8)
+pred <- tree.classify.bag(pimaData, c(tree))
+print("Pima")
+print(table(pred, pimaClass))
+#tree <- tree.grow(e.2.0.data, e.2.0.class, 15, 15, 41)	
+
+#print(tree$classify(e.3.0.data[180,]))
+#pred <- tree.classify.bag(e.3.0.data, c(tree))
+#print(table(pred, e.3.0.class))
+#trees <- tree.grow.bag(e.2.0.data, e.2.0.class, 15, 15, 41, 4)
+#preds <- tree.classify.bag(e.3.0.data, trees)
+#print(table(preds, e.3.0.class))
+#trees <- tree.grow.bag(e.2.0.data, e.2.0.class, 15, 15, 41, 100)
+#preds <- tree.classify.bag(e.3.0.data, trees)
+#print(table(preds, e.3.0.class))
+# print(tree.classify.bag(data, c(tree))) 	# print(tree.classify.bag(data, c(tree))) 
 
 
 # print(tree.classify.bag(data, c(tree)))

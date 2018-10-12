@@ -17,15 +17,14 @@ delta.impurity <- function(t, l, r) {
   return(i.t - p.l * imp.l - p.r * imp.r)
 }
 
-bestsplit <- function(x, y){
-  x.sort <- sort(unique(x))
+bestsplit <- function(x, y, uniX, impY){
+  x.sort <- sort(uniX)
   l <- length(x.sort)
   ly <- length(y);
   x.split <- (x.sort[1:(l - 1)] + x.sort[2:l])/2
-  impurityValue <- c()
-  splitValue <- impurity(y)
-  impurityValue <- impurity(y)
-  shortestLength <- length(y)
+  splitValue <- impY
+  impurityValue <- impY
+  shortestLength <- ly
   for(split in x.split){
     dataLeft <- y[x <= split]
     dataRight <- y[x > split]
