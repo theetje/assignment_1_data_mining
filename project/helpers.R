@@ -1,8 +1,8 @@
-impurity <- function(vector){
+impurity <- function(vector) {
   total <- length(vector)
   occ <- table(vector)
   occ1 <- occ[names(occ) == 1]
-  if(identical(unname(occ1), integer(0)))
+  if (identical(unname(occ1), integer(0)))
     occ1 <- 0
   return((occ1 / total) * (1 - (occ1 / total)))
 }
@@ -17,29 +17,31 @@ delta.impurity <- function(t, l, r) {
   return(i.t - p.l * imp.l - p.r * imp.r)
 }
 
-bestsplit <- function(x, y){
-  x.sort <- sort(unique(x))
+bestsplit <- function(x, y, minleaf, impY) {
+  x.sort <- sort(x)
   l <- length(x.sort)
-  ly <- length(y);
-  x.split <- (x.sort[1:(l - 1)] + x.sort[2:l])/2
-  impurityValue <- c()
-  splitValue <- impurity(y)
-  impurityValue <- impurity(y)
-  shortestLength <- length(y)
-  for(split in x.split){
+  ly <- length(y)
+  
+  x.split <- (x.sort[1:(l - 1)] + x.sort[2:l]) / 2
+  splitValue <- impY
+  impurityValue <- impY
+  shortestLength <- ly
+  for (split in x.split) {
     dataLeft <- y[x <= split]
     dataRight <- y[x > split]
     lDL <- length(dataLeft)
     lDR <- length(dataRight)
-    if(lDL <= lDR)
+    if (lDL < lDR)
       shortest <- lDL
     else
       shortest <- lDR
-    impuritySplit = (length(dataLeft) / ly) * impurity(dataLeft) + (length(dataRight) / ly) * impurity(dataRight)
-    if(impuritySplit < impurityValue){
-      splitValue <- split
-      impurityValue <- impuritySplit
-      shortestLength <- shortest
+    if (shortest >= minleaf) {
+      impuritySplit <- (lDL / ly) * impurity(dataLeft) + (lDR / ly) * impurity(dataRight)
+      if (impuritySplit < impurityValue) {
+        splitValue <- split
+        impurityValue <- impuritySplit
+        shortestLength <- shortest
+      }
     }
   }
   return(c(splitValue, impurityValue, shortestLength))
@@ -48,7 +50,7 @@ bestsplit <- function(x, y){
 
 make.s.star <- function(attribute, y) {
   S <- bestsplit(attribute, y)
-  df <- data.frame(attribute, value=y)
+  df <- data.frame(attribute, value = y)
   
   return(split(df, attribute < S))
 }
