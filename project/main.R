@@ -174,9 +174,6 @@ impurity <- function(vector) {
   return((occ1 / total) * (1 - (occ1 / total)))
 }
 
-# This method has more parameters for efficiency, this way unique values and the impurity of Y don't have to be
-# calculated again in this method, and no calculations that will result in a rejection down the line due to minleaf
-# being too low have to be made
 # bestsplit
 # Parameters: x; the vector that needs to be split on, any numeric vector
 #             y; the class labels, vector of integers
