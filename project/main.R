@@ -1,7 +1,17 @@
 source("helpers.R")
-credit.data <- read.csv("./credit.txt")
-class <- credit.data[, 6]
-data <- credit.data[,-6]
+
+e.2.0.data <- read.csv("./eclipse-metrics-packages-2.0.csv")
+e.3.0.data <- read.csv("./eclipse-metrics-packages-3.0.csv")
+
+e.2.0.data$post[e.2.0.data$post > 0] <- 1
+e.3.0.data$post[e.3.0.data$post > 0] <- 1
+
+e.2.0.class <- e.2.0.data$post
+e.3.0.class <- e.3.0.data$post
+
+e.2.0.data$post <- NULL
+e.3.0.data$post <- NULL
+
 
 root <-
   setRefClass("root", fields = list(left = "ANY", right = "ANY"))
@@ -35,7 +45,6 @@ leaf <-
   )
 
 tree.grow <- function(x, y, nmin, minleaf, nfeat) {
-  print(x)
   if (impurity(y) == 0 || length(y) < nmin) {
     return(leaf(data_set = as.integer(names(
       which.max(table(y))
@@ -45,7 +54,7 @@ tree.grow <- function(x, y, nmin, minleaf, nfeat) {
   attributeName <- NULL
   attribute <- NULL
   attributeValue <- NULL
-  names <- colnames(data)
+  names <- colnames(x)
   predictors <- sample(names, nfeat)
   for (a in predictors) {
     if (length(unique(x[[a]])) > 1) {
@@ -100,9 +109,9 @@ tree.classify.bag <- function(x, tr){
   return(classifications)
 }
 
-tree <- tree.grow(data, class, 1, 1, 5)
+tree <- tree.grow(e.2.0.data, e.2.0.class, 15, 15, 41)
 
 print(tree)
 
-print(tree$classify(data[7, ]))
-print(tree.classify.bag(data, c(tree)))
+# print(tree$classify(e.3.0.data))
+# print(tree.classify.bag(data, c(tree)))
