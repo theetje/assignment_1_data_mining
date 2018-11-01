@@ -1,9 +1,14 @@
 library(tm)
+library(NLP)
 library(glmnet)
 library(rpart)
 library(rpart.plot)
 library(randomForest)
 library(entropy)
+
+BigramTokenizer <-
+  function(x)
+    unlist(lapply(ngrams(words(x), 2), paste, collapse = " "), use.names = FALSE)
 
 train.mnb <- function (dtm,labels) 
 {
@@ -60,14 +65,6 @@ train.all <- tm_map(train.all,removeNumbers)
 # Remove excess whitespace
 train.all <- tm_map(train.all,stripWhitespace)
 
-as.character(train.all[[1]])
-
-terms <- DocumentTermMatrix(train.all,
-                                 control=list(weighting=weightTf))
-# remove sparse terms
-terms <- removeSparseTerms(terms,0.95)
-
-
 test.pos <- VCorpus(DirSource("./test/truthful_from_Web",
                               encoding="UTF-8", recursive = TRUE))
 test.neg <- VCorpus(DirSource("./test/deceptive_from_MTurk",
@@ -89,15 +86,36 @@ test.all <- tm_map(test.all,removeNumbers)
 test.all <- tm_map(test.all,stripWhitespace)
 
 
+terms <- DocumentTermMatrix(train.all,
+                                 control=list(weighting=weightTf))
+# remove sparse terms
+terms <- removeSparseTerms(terms,0.95)
+
+bigrams <- DocumentTermMatrix(train.all, control = list(tokenize = BigramTokenizer))
+
+bigrams <- removeSparseTerms(bigrams, 0.95)
+
+train.dat1 <- as.matrix(terms)
+train.dat2 <- as.matrix(bigrams)
+train.dat <- cbind(train.dat1,train.dat2)
+
 test.terms <- DocumentTermMatrix(test.all,
                                  control=list(dictionary = dimnames(terms)[[2]]))
+
+test.bigrams <- DocumentTermMatrix(test.all,
+                                 control=list(dictionary = dimnames(train.dat)[[2]]))
+test.bigrams <- as.matrix(test.bigrams)
+# get columns in the same order as on the training set
+test.bigrams <- test.bigrams[,dimnames(train.dat)[[2]]]
 
 # compute mutual information of each term with class label
 train.mi <- apply(as.matrix(terms),2,
                     function(x,y){mi.plugin(table(x,y)/length(y))},train.labels)
-# sort the indices from high to low mutual information
 train.mi.order <- order(train.mi,decreasing=T)
 
+train.mi.bigrams <- apply(as.matrix(train.dat),2,
+                          function(x,y){mi.plugin(table(x,y)/length(y))},train.labels)
+train.mi.bigrams.order <- order(train.mi.bigrams,decreasing=T)
 result <- function(table){
   acc <- (table[1,1] + table[2,2])/sum(table)
   rec <- table[2,2] / (table[2,2] + table[2, 1])
@@ -114,9 +132,9 @@ logres <- function(train, train.labels, test, test.labels){
                             family="binomial",type.measure="class")
   
   train.logreg2.pred <- predict(train.glmnet,
-                                newx=test,s="lambda.min",type="class")
+                                newx=as.matrix(test),s="lambda.min",type="class")
   return(table(train.logreg2.pred,test.labels))
-}
+1}
 
 naibay <- function(train, train.labels, features, test, test.labels){
   reviews.mnb <- train.mnb(as.matrix(train)[,features[1:40]],train.labels)
